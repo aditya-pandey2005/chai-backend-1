@@ -108,6 +108,18 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 
 const getLikedVideos = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
+    const user = req.user;
+    if (!user || !user._id) {
+        throw new ApiError(401, "User not authorized");
+    }
+
+    const likedVideos = await Like.find({
+        user: user._id, 
+        video: {$exists: true}
+    }).populate("video");
+
+    const videos = likedVideos.map(like => like.video);
+    return res.status(200).json(new ApiResponse(200, videos, "Videos liked by user"));
 })
 
 export {
